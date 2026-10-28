@@ -1,0 +1,1201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>RupeeRoute - Smart Budgeting & Wealth Route</title>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      /* Peach Background & Theme Palette */
+      --bg-peach: #ffe8dc;
+      --bg-peach-light: #fff4ee;
+      --peach-border: #ffd3c0;
+      --peach-accent: #ff7043;
+      --peach-dark: #d84315;
+
+      /* PhonePe Identity Accents */
+      --phonepe-purple: #5f259f;
+      --phonepe-purple-dark: #4a154b;
+      --phonepe-purple-light: #7c3aed;
+      --phonepe-badge: #ede7f6;
+      --success: #10b981;
+      --danger: #ef4444;
+      --surface: #ffffff;
+      --text-main: #271c19;
+      --text-muted: #7c6862;
+      --radius: 16px;
+      --shadow: 0 8px 24px rgba(216, 67, 21, 0.12);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* Overall Peach Background */
+    body {
+      background-color: var(--bg-peach);
+      background-image: radial-gradient(circle at 50% 0%, #fff6f0 0%, var(--bg-peach) 100%);
+      color: var(--text-main);
+      display: flex;
+      justify-content: center;
+      min-height: 100vh;
+    }
+
+    /* Mobile Frame Shell */
+    .app-shell {
+      width: 100%;
+      max-width: 480px;
+      background: var(--bg-peach-light);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      box-shadow: 0 10px 40px rgba(95, 37, 159, 0.18);
+      border-left: 1px solid var(--peach-border);
+      border-right: 1px solid var(--peach-border);
+    }
+
+    /* Standard Card Component */
+    .card {
+      background: var(--surface);
+      border-radius: var(--radius);
+      padding: 16px;
+      box-shadow: var(--shadow);
+      margin-bottom: 16px;
+      border: 1px solid var(--peach-border);
+    }
+
+    /* Button Variants */
+    .btn {
+      background: var(--phonepe-purple);
+      color: #fff;
+      border: none;
+      padding: 12px 18px;
+      border-radius: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-size: 14px;
+      transition: all 0.2s ease;
+    }
+
+    .btn:hover { background: var(--phonepe-purple-dark); }
+    .btn-peach { background: var(--peach-accent); color: white; }
+    .btn-peach:hover { background: var(--peach-dark); }
+    .btn-secondary { background: var(--phonepe-badge); color: var(--phonepe-purple); }
+    .btn-danger { background: #fee2e2; color: var(--danger); }
+    .btn-sm { padding: 6px 12px; font-size: 12px; border-radius: 8px; }
+
+    input, select {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1.5px solid var(--peach-border);
+      border-radius: 10px;
+      font-size: 14px;
+      outline: none;
+      margin-top: 6px;
+      margin-bottom: 12px;
+      background: #ffffff;
+      color: var(--text-main);
+    }
+
+    input:focus, select:focus {
+      border-color: var(--phonepe-purple);
+    }
+
+    /* Screen Views Manager */
+    .screen {
+      display: none;
+      flex: 1;
+      padding: 18px;
+      overflow-y: auto;
+      padding-bottom: 90px;
+    }
+
+    .screen.active {
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Top PhonePe Style Header */
+    .top-header {
+      background: var(--phonepe-purple);
+      color: white;
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 4px 12px rgba(95, 37, 159, 0.25);
+    }
+
+    .user-profile {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .avatar {
+      width: 40px;
+      height: 40px;
+      background: rgba(255, 255, 255, 0.2);
+      border: 2px solid #ffffff;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 16px;
+    }
+
+    /* Auth Screen */
+    .auth-banner {
+      text-align: center;
+      padding: 30px 10px 20px;
+    }
+
+    .brand-logo-icon {
+      width: 72px;
+      height: 72px;
+      background: var(--phonepe-purple);
+      color: white;
+      border-radius: 20px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 34px;
+      box-shadow: 0 8px 20px rgba(95, 37, 159, 0.3);
+      margin-bottom: 12px;
+    }
+
+    /* Income Wallet Card */
+    .income-card {
+      background: linear-gradient(135deg, var(--phonepe-purple) 0%, #7c3aed 100%);
+      color: white;
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 18px;
+      box-shadow: 0 10px 25px rgba(95, 37, 159, 0.25);
+    }
+
+    .income-card h4 { font-size: 11px; text-transform: uppercase; letter-spacing: 0.8px; opacity: 0.85; }
+    .income-card h2 { font-size: 32px; margin: 4px 0 12px; font-weight: 800; }
+
+    /* Slots Grid Layout */
+    .slots-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .slot-card {
+      background: #ffffff;
+      border: 1px solid var(--peach-border);
+      border-radius: var(--radius);
+      padding: 16px;
+      cursor: pointer;
+      position: relative;
+      transition: all 0.2s ease;
+    }
+
+    .slot-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(216, 67, 21, 0.16);
+      border-color: var(--peach-accent);
+    }
+
+    .slot-card.featured {
+      grid-column: span 2;
+      background: #faf5ff;
+      border: 1.5px solid #d8b4fe;
+    }
+
+    .slot-badge-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      margin-bottom: 8px;
+    }
+
+    /* Sub Slot Items */
+    .subslot-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 0;
+      border-bottom: 1px dashed var(--peach-border);
+    }
+
+    .progress-bar-bg {
+      background: #f0e2da;
+      height: 8px;
+      border-radius: 4px;
+      overflow: hidden;
+      margin: 6px 0 2px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--peach-dark);
+      border-radius: 4px;
+    }
+
+    /* Bottom Navigation Bar */
+    .bottom-nav {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #ffffff;
+      display: flex;
+      justify-content: space-around;
+      border-top: 1px solid var(--peach-border);
+      padding: 12px 0;
+      z-index: 100;
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      font-size: 11px;
+      color: var(--text-muted);
+      cursor: pointer;
+      gap: 4px;
+    }
+
+    .nav-item.active {
+      color: var(--phonepe-purple);
+      font-weight: 700;
+    }
+
+    /* Chatbot Styles */
+    .chat-box {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      height: 380px;
+      overflow-y: auto;
+      padding: 12px;
+      background: #ffffff;
+      border-radius: 14px;
+      border: 1px solid var(--peach-border);
+      margin-bottom: 12px;
+    }
+
+    .msg {
+      max-width: 82%;
+      padding: 10px 14px;
+      border-radius: 14px;
+      font-size: 13.5px;
+      line-height: 1.45;
+    }
+
+    .msg-bot {
+      background: #fff0ea;
+      color: #3b180d;
+      border: 1px solid #ffccb8;
+      align-self: flex-start;
+      border-bottom-left-radius: 2px;
+    }
+
+    .msg-user {
+      background: var(--phonepe-purple);
+      color: white;
+      align-self: flex-end;
+      border-bottom-right-radius: 2px;
+    }
+
+    .chip-container {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+
+    .quick-chip {
+      background: #ffe3d5;
+      color: var(--peach-dark);
+      border: 1px solid #ffbc9f;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 11.5px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    /* Modal Sheet Overlay */
+    .modal-overlay {
+      display: none;
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.55);
+      z-index: 200;
+      justify-content: center;
+      align-items: flex-end;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal-sheet {
+      width: 100%;
+      background: white;
+      border-top-left-radius: 24px;
+      border-top-right-radius: 24px;
+      padding: 22px;
+      box-shadow: 0 -8px 30px rgba(0,0,0,0.25);
+      max-height: 85vh;
+      overflow-y: auto;
+      animation: slideUp 0.25s ease-out;
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(100%); }
+      to { transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+<div class="app-shell">
+
+  <!-- ================= SCREEN 0: AUTHENTICATION ================= -->
+  <div id="authScreen" class="screen active">
+    <div class="auth-banner">
+      <div class="brand-logo-icon"><i class="fa-solid fa-route"></i></div>
+      <h1 style="color: var(--phonepe-purple); font-weight: 800;">RupeeRoute</h1>
+      <p style="color: var(--text-muted); font-size: 13.5px; margin-top: 4px;">Smart Budget Allocation & Financial Route</p>
+    </div>
+
+    <div class="card">
+      <h3 style="color: var(--phonepe-purple); margin-bottom: 14px;"><i class="fa-solid fa-user-lock"></i> User Authentication</h3>
+
+      <label style="font-size: 12px; font-weight: 600;">Full Name / Username</label>
+      <input type="text" id="regName" placeholder="e.g. Ramesh Kumar" />
+
+      <label style="font-size: 12px; font-weight: 600;">Phone Number</label>
+      <input type="tel" id="regPhone" placeholder="Enter 10-digit mobile number" maxlength="10" />
+
+      <label style="font-size: 12px; font-weight: 600;">Set Password</label>
+      <input type="password" id="regPass" placeholder="Enter secure password" />
+
+      <button class="btn btn-peach" style="width: 100%;" onclick="generateOtpFlow()">
+        <i class="fa-solid fa-paper-plane"></i> Generate OTP
+      </button>
+
+      <!-- OTP Verification Block -->
+      <div id="otpInputBlock" style="display: none; margin-top: 16px;">
+        <div style="background: #e8f5e9; border: 1px solid #a5d6a7; padding: 10px; border-radius: 8px; text-align: center; margin-bottom: 12px;">
+          <span style="font-size: 11.5px; color: #2e7d32;">Simulated RupeeRoute OTP:</span>
+          <div style="font-size: 22px; font-weight: 800; color: #1b5e20; letter-spacing: 4px;" id="otpChipDisplay">----</div>
+        </div>
+
+        <label style="font-size: 12px; font-weight: 600;">Enter 4-Digit OTP</label>
+        <input type="number" id="inputOtp" placeholder="Enter 4-digit code" />
+
+        <button class="btn" style="width: 100%; background: var(--success);" onclick="verifyOtpAndEnter()">
+          <i class="fa-solid fa-shield-check"></i> Verify & Enter RupeeRoute
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= TOP HEADER (PHONEPE PURPLE) ================= -->
+  <header class="top-header" id="topHeader" style="display: none;">
+    <div class="user-profile">
+      <div class="avatar" id="avatarIcon">U</div>
+      <div>
+        <div style="font-size: 11px; opacity: 0.85;">Namaste,</div>
+        <div style="font-weight: 700; font-size: 15px;" id="headerUserName">User</div>
+      </div>
+    </div>
+    <div style="display: flex; gap: 14px; font-size: 18px; align-items: center;">
+      <i class="fa-solid fa-bell" title="Alerts" style="cursor: pointer;"></i>
+      <i class="fa-solid fa-power-off" title="Logout" style="cursor: pointer;" onclick="logout()"></i>
+    </div>
+  </header>
+
+  <!-- ================= SCREEN 1: MAIN DASHBOARD & 5 SAVING SLOTS ================= -->
+  <div id="homeScreen" class="screen">
+    <!-- Active Income Banner -->
+    <div class="income-card">
+      <h4>Monthly Active Budget</h4>
+      <h2 id="totalIncomeDisplay">₹0</h2>
+      <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+        <button class="btn btn-sm btn-secondary" onclick="openIncomeModal()">
+          <i class="fa-solid fa-pencil"></i> Set Amount
+        </button>
+        <button class="btn btn-sm btn-secondary" onclick="openSplitModal()">
+          <i class="fa-solid fa-sliders"></i> Adjust Master Splits (%)
+        </button>
+      </div>
+    </div>
+
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+      <h3 style="font-size: 16px; font-weight: 700;">5 Dedicated Money Slots</h3>
+      <span style="font-size: 12px; color: var(--peach-dark); font-weight: 600;">Tap any slot to open</span>
+    </div>
+
+    <!-- The 5 Required Saving Slots Grid -->
+    <div class="slots-grid">
+      <!-- Slot 1: Investment (25%) -->
+      <div class="slot-card featured" onclick="openDedicatedSlotPage('investment')">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+          <div class="slot-badge-icon" style="background: #ede9fe; color: var(--phonepe-purple);"><i class="fa-solid fa-arrow-trend-up"></i></div>
+          <span style="font-weight: 700; color: var(--phonepe-purple); font-size: 15px;" id="pctBadge_investment">25%</span>
+        </div>
+        <h4 style="font-size: 16px;">Investment</h4>
+        <div style="font-size: 12px; color: var(--text-muted); margin: 2px 0 6px;">Savings (0.25 default), SIPs & Stocks</div>
+        <strong id="amtBadge_investment" style="font-size: 18px; color: var(--phonepe-purple);">₹0</strong>
+      </div>
+
+      <!-- Slot 2: Health & Emergency (10%) -->
+      <div class="slot-card" onclick="openDedicatedSlotPage('health')">
+        <div class="slot-badge-icon" style="background: #fee2e2; color: #b91c1c;"><i class="fa-solid fa-heart-pulse"></i></div>
+        <div style="display: flex; justify-content: space-between;">
+          <h4>Health & Emerg.</h4>
+          <span id="pctBadge_health" style="font-weight: 700;">10%</span>
+        </div>
+        <div style="font-size: 11px; color: var(--text-muted);">Insurances & Medicines</div>
+        <strong id="amtBadge_health" style="color: #b91c1c; display: block; margin-top: 4px;">₹0</strong>
+      </div>
+
+      <!-- Slot 3: Traveling (15%) -->
+      <div class="slot-card" onclick="openDedicatedSlotPage('travel')">
+        <div class="slot-badge-icon" style="background: #e0f2fe; color: #0284c7;"><i class="fa-solid fa-plane-departure"></i></div>
+        <div style="display: flex; justify-content: space-between;">
+          <h4>Traveling</h4>
+          <span id="pctBadge_travel" style="font-weight: 700;">15%</span>
+        </div>
+        <div style="font-size: 11px; color: var(--text-muted);">Trips, Car & Bike Ins.</div>
+        <strong id="amtBadge_travel" style="color: #0284c7; display: block; margin-top: 4px;">₹0</strong>
+      </div>
+
+      <!-- Slot 4: Personal Expenses (15%) -->
+      <div class="slot-card" onclick="openDedicatedSlotPage('personal')">
+        <div class="slot-badge-icon" style="background: #fef3c7; color: #b45309;"><i class="fa-solid fa-bag-shopping"></i></div>
+        <div style="display: flex; justify-content: space-between;">
+          <h4>Personal Exp.</h4>
+          <span id="pctBadge_personal" style="font-weight: 700;">15%</span>
+        </div>
+        <div style="font-size: 11px; color: var(--text-muted);">Shopping & Dining</div>
+        <strong id="amtBadge_personal" style="color: #d97706; display: block; margin-top: 4px;">₹0</strong>
+      </div>
+
+      <!-- Slot 5: House Expenses (35%) -->
+      <div class="slot-card" onclick="openDedicatedSlotPage('house')">
+        <div class="slot-badge-icon" style="background: #dcfce7; color: #15803d;"><i class="fa-solid fa-house"></i></div>
+        <div style="display: flex; justify-content: space-between;">
+          <h4>House Exp.</h4>
+          <span id="pctBadge_house" style="font-weight: 700;">35%</span>
+        </div>
+        <div style="font-size: 11px; color: var(--text-muted);">Grocery 50%, Other 50%</div>
+        <strong id="amtBadge_house" style="color: #16a34a; display: block; margin-top: 4px;">₹0</strong>
+      </div>
+    </div>
+
+    <!-- Live Budget Allocation Chart -->
+    <div class="card">
+      <h4 style="margin-bottom: 8px;"><i class="fa-solid fa-chart-pie"></i> Master Allocation Overview</h4>
+      <canvas id="quickMasterChart" style="max-height: 180px;"></canvas>
+    </div>
+  </div>
+
+  <!-- ================= SCREEN 2: DEDICATED INDIVIDUAL SLOT PAGE ================= -->
+  <div id="slotPageScreen" class="screen">
+    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+      <button class="btn btn-sm btn-secondary" onclick="switchNavTab('home')">
+        <i class="fa-solid fa-arrow-left"></i> All Slots
+      </button>
+      <h3 id="slotPageHeaderTitle" style="color: var(--phonepe-purple);">Slot Details</h3>
+    </div>
+
+    <!-- Slot Total and Remaining Balance Header -->
+    <div class="card" style="border-left: 5px solid var(--peach-dark);">
+      <div style="display: flex; justify-content: space-between;">
+        <div>
+          <span style="font-size: 12px; color: var(--text-muted);">Total Budget Allocated</span>
+          <h2 id="slotPageAllocatedDisplay">₹0</h2>
+        </div>
+        <div style="text-align: right;">
+          <span style="font-size: 12px; color: var(--text-muted);">Remaining Funds</span>
+          <h2 id="slotPageRemainingDisplay" style="color: var(--success);">₹0</h2>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sub-slots Management Block -->
+    <div class="card">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+        <h4 style="font-size: 15px;"><i class="fa-solid fa-layer-group"></i> Sub-Allocations</h4>
+        <button class="btn btn-sm btn-peach" onclick="openAddSubSlotModal()">
+          <i class="fa-solid fa-plus"></i> Add Sub-Slot
+        </button>
+      </div>
+      <div id="subSlotsListContainer">
+        <!-- Injected Dynamically -->
+      </div>
+    </div>
+
+    <!-- Form: Record Transaction in This Slot -->
+    <div class="card">
+      <h4 style="margin-bottom: 8px;"><i class="fa-solid fa-receipt"></i> Log Expense Under This Slot</h4>
+      <input type="text" id="txDescriptionInput" placeholder="Expense description (e.g. SIP, Car Insurance, Veggies)" />
+      <input type="number" id="txAmountInput" placeholder="Amount (₹)" />
+      <button class="btn btn-peach" style="width: 100%;" onclick="submitSlotExpense()">
+        <i class="fa-solid fa-minus-circle"></i> Deduct & Record Transaction
+      </button>
+    </div>
+
+    <!-- Transactions List Below In This Respective Page -->
+    <div class="card">
+      <h4 style="margin-bottom: 10px;"><i class="fa-solid fa-clock-rotate-left"></i> Transaction History (This Slot)</h4>
+      <div id="slotTransactionsList">
+        <!-- Injected Dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= SCREEN 3: ANALYTICS & TRANSACTION GRAPHS ================= -->
+  <div id="analyticsScreen" class="screen">
+    <h3 style="margin-bottom: 16px; color: var(--phonepe-purple);"><i class="fa-solid fa-chart-column"></i> Expense & Transaction Graphs</h3>
+
+    <div class="card">
+      <h4>Allocated Budget vs Real Spending</h4>
+      <canvas id="barAnalyticsChart" style="margin-top: 10px; max-height: 230px;"></canvas>
+    </div>
+
+    <div class="card">
+      <h4>Realized Expense Distribution Across Slots</h4>
+      <canvas id="doughnutAnalyticsChart" style="margin-top: 10px; max-height: 220px;"></canvas>
+    </div>
+  </div>
+
+  <!-- ================= SCREEN 4: AI FINANCIAL ADVISOR CHATBOT ================= -->
+  <div id="chatbotScreen" class="screen">
+    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 14px;">
+      <div class="slot-badge-icon" style="background: #ffe3d5; color: var(--peach-dark);"><i class="fa-solid fa-robot"></i></div>
+      <div>
+        <h3 style="color: var(--phonepe-purple);">RupeeRoute AI Advisor</h3>
+        <p style="font-size: 12px; color: var(--text-muted);">Custom Investment Advice Tuned To Your Income</p>
+      </div>
+    </div>
+
+    <div class="chat-box" id="chatMessagesBox">
+      <div class="msg msg-bot">
+        Namaste! I am your RupeeRoute Financial Advisor. Tap the quick buttons below or ask me any question to get customized investment recommendations for your income!
+      </div>
+    </div>
+
+    <div class="chip-container">
+      <span class="quick-chip" onclick="botRecommendForCurrentIncome()">Best Plan For My Income</span>
+      <span class="quick-chip" onclick="sendQuickQuery('How should I split my 25% investment slot?')">Investment 25% Tips</span>
+      <span class="quick-chip" onclick="sendQuickQuery('What should be my emergency fund buffer?')">Emergency Fund Tips</span>
+    </div>
+
+    <div style="display: flex; gap: 8px;">
+      <input type="text" id="chatTextInput" placeholder="Ask about Mutual funds, SGB, Stocks, PPF..." style="margin: 0;" />
+      <button class="btn btn-peach" onclick="handleSendChat()"><i class="fa-solid fa-paper-plane"></i></button>
+    </div>
+  </div>
+
+  <!-- ================= BOTTOM NAVIGATION BAR ================= -->
+  <nav class="bottom-nav" id="bottomNav" style="display: none;">
+    <div class="nav-item active" id="tabNavHome" onclick="switchNavTab('home')">
+      <i class="fa-solid fa-wallet" style="font-size: 19px;"></i>
+      <span>Slots</span>
+    </div>
+    <div class="nav-item" id="tabNavAnalytics" onclick="switchNavTab('analytics')">
+      <i class="fa-solid fa-chart-line" style="font-size: 19px;"></i>
+      <span>Analytics</span>
+    </div>
+    <div class="nav-item" id="tabNavBot" onclick="switchNavTab('bot')">
+      <i class="fa-solid fa-brain" style="font-size: 19px;"></i>
+      <span>AI Advisor</span>
+    </div>
+  </nav>
+
+  <!-- ================= IN-APP MODAL: SET INCOME ================= -->
+  <div class="modal-overlay" id="modalIncome">
+    <div class="modal-sheet">
+      <h3 style="margin-bottom: 12px; color: var(--phonepe-purple);">Set Monthly Income</h3>
+      <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 10px;">Enter your monthly disposable budget in Rupees.</p>
+      <input type="number" id="inputModalIncome" placeholder="e.g. 60000" />
+      <div style="display: flex; gap: 10px;">
+        <button class="btn btn-peach" style="flex: 1;" onclick="saveMonthlyIncome()">Save Income</button>
+        <button class="btn btn-secondary" onclick="closeModals()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= IN-APP MODAL: MASTER PERCENTAGE ADJUSTER ================= -->
+  <div class="modal-overlay" id="modalSplits">
+    <div class="modal-sheet">
+      <h3 style="margin-bottom: 12px; color: var(--phonepe-purple);">Adjust Master Percentages</h3>
+      <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 10px;">The sum of all 5 slots must equal 100%.</p>
+
+      <label style="font-size: 12px; font-weight: 600;">Investment Slot % (Default 25%)</label>
+      <input type="number" id="splitInput_investment" />
+
+      <label style="font-size: 12px; font-weight: 600;">Health & Emergency Slot % (Default 10%)</label>
+      <input type="number" id="splitInput_health" />
+
+      <label style="font-size: 12px; font-weight: 600;">Traveling Slot % (Default 15%)</label>
+      <input type="number" id="splitInput_travel" />
+
+      <label style="font-size: 12px; font-weight: 600;">Personal Expenses Slot % (Default 15%)</label>
+      <input type="number" id="splitInput_personal" />
+
+      <label style="font-size: 12px; font-weight: 600;">House Expenses Slot % (Default 35%)</label>
+      <input type="number" id="splitInput_house" />
+
+      <div style="display: flex; gap: 10px; margin-top: 10px;">
+        <button class="btn btn-peach" style="flex: 1;" onclick="saveMasterPercentages()">Update Splits</button>
+        <button class="btn btn-secondary" onclick="closeModals()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= IN-APP MODAL: ADD / EDIT SUB-SLOT ================= -->
+  <div class="modal-overlay" id="modalSubSlot">
+    <div class="modal-sheet">
+      <h3 style="margin-bottom: 12px; color: var(--phonepe-purple);" id="modalSubSlotTitle">Add Sub-Slot</h3>
+      <input type="hidden" id="editSubSlotIndex" value="-1" />
+
+      <label style="font-size: 12px; font-weight: 600;">Sub-Slot Name</label>
+      <input type="text" id="inputSubSlotName" placeholder="e.g. Car Insurance, Savings, Parents Policy" />
+
+      <label style="font-size: 12px; font-weight: 600;">Share Percentage (%)</label>
+      <input type="number" id="inputSubSlotShare" placeholder="e.g. 25" />
+
+      <div style="display: flex; gap: 10px; margin-top: 10px;">
+        <button class="btn btn-peach" style="flex: 1;" onclick="saveSubSlotEntry()">Save Sub-Slot</button>
+        <button class="btn btn-secondary" onclick="closeModals()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ================= JAVASCRIPT APPLICATION CORE ================= -->
+<script>
+  // ---------- APPLICATION DATA STATE ----------
+  const appState = {
+    user: null,
+    generatedOtp: null,
+    monthlyIncome: 60000,
+    currentSlotKey: null,
+
+    // Default primary allocations: 0.25, 0.10, 0.15, 0.15, 0.35 = 1.00 (100%)
+    slotPercentages: {
+      investment: 0.25,
+      health: 0.10,
+      travel: 0.15,
+      personal: 0.15,
+      house: 0.35
+    },
+
+    // Sub-slots with explicit defaults as requested
+    subSlots: {
+      // Under investment: Savings 0.25 default, adjustable, add/rename
+      investment: [
+        { name: "Savings", share: 0.25 },
+        { name: "Mutual Funds (SIP)", share: 0.50 },
+        { name: "Direct Stocks & Equities", share: 0.25 }
+      ],
+      // Under health & emergency: insurance with family names, medicines, add/removable
+      health: [
+        { name: "Health Insurance - Parents", share: 0.35 },
+        { name: "Health Insurance - Self & Spouse", share: 0.30 },
+        { name: "Medicines & Pharmacy", share: 0.20 },
+        { name: "Emergency Liquid Cash", share: 0.15 }
+      ],
+      // Under travelling: travelling places, car insurance, bike insurance
+      travel: [
+        { name: "Travel Places / Vacations", share: 0.50 },
+        { name: "Car Insurance", share: 0.30 },
+        { name: "Bike Insurance", share: 0.20 }
+      ],
+      // Personal Expenses
+      personal: [
+        { name: "Shopping & Apparel", share: 0.40 },
+        { name: "Dining & Cafes", share: 0.35 },
+        { name: "Entertainment & Subscriptions", share: 0.25 }
+      ],
+      // Under house expenses: Grocery 0.50, Other 0.50 default, adjustable, add/remove
+      house: [
+        { name: "Grocery", share: 0.50 },
+        { name: "Other House Expenses", share: 0.50 }
+      ]
+    },
+
+    // Individual transaction log for each of the 5 slots
+    transactions: {
+      investment: [],
+      health: [],
+      travel: [],
+      personal: [],
+      house: []
+    }
+  };
+
+  // Chart instances
+  let masterChartInstance = null;
+  let barChartInstance = null;
+  let doughnutChartInstance = null;
+
+  // ---------- AUTHENTICATION LOGIC ----------
+  function generateOtpFlow() {
+    const name = document.getElementById("regName").value.trim();
+    const phone = document.getElementById("regPhone").value.trim();
+    const pass = document.getElementById("regPass").value.trim();
+
+    if (!name || phone.length < 10 || !pass) {
+      alert("Please provide valid Name, 10-digit Phone number, and Password.");
+      return;
+    }
+
+    // Generate simulated 4-digit OTP
+    appState.generatedOtp = Math.floor(1000 + Math.random() * 9000).toString();
+    document.getElementById("otpChipDisplay").innerText = appState.generatedOtp;
+    document.getElementById("otpInputBlock").style.display = "block";
+    alert(`RupeeRoute SMS OTP for ${phone}: ${appState.generatedOtp}`);
+  }
+
+  function verifyOtpAndEnter() {
+    const inputOtp = document.getElementById("inputOtp").value.trim();
+    if (inputOtp === appState.generatedOtp) {
+      appState.user = {
+        name: document.getElementById("regName").value.trim(),
+        phone: document.getElementById("regPhone").value.trim()
+      };
+
+      document.getElementById("authScreen").classList.remove("active");
+      document.getElementById("topHeader").style.display = "flex";
+      document.getElementById("bottomNav").style.display = "flex";
+      document.getElementById("homeScreen").classList.add("active");
+
+      document.getElementById("headerUserName").innerText = appState.user.name;
+      document.getElementById("avatarIcon").innerText = appState.user.name.charAt(0).toUpperCase();
+
+      refreshDashboard();
+    } else {
+      alert("Invalid OTP! Check the simulated OTP code box.");
+    }
+  }
+
+  function logout() {
+    if (confirm("Do you want to log out of RupeeRoute?")) {
+      location.reload();
+    }
+  }
+
+  // ---------- TAB NAVIGATION ----------
+  function switchNavTab(tabId) {
+    document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+    document.querySelectorAll(".nav-item").forEach(n => n.classList.remove("active"));
+
+    if (tabId === "home") {
+      document.getElementById("homeScreen").classList.add("active");
+      document.getElementById("tabNavHome").classList.add("active");
+      renderMasterChart();
+    } else if (tabId === "analytics") {
+      document.getElementById("analyticsScreen").classList.add("active");
+      document.getElementById("tabNavAnalytics").classList.add("active");
+      renderAnalyticsGraphs();
+    } else if (tabId === "bot") {
+      document.getElementById("chatbotScreen").classList.add("active");
+      document.getElementById("tabNavBot").classList.add("active");
+    }
+  }
+
+  // ---------- DASHBOARD CALCULATIONS ----------
+  function refreshDashboard() {
+    document.getElementById("totalIncomeDisplay").innerText = `₹${appState.monthlyIncome.toLocaleString("en-IN")}`;
+
+    // Update 5 Slot Card Numbers
+    for (let key in appState.slotPercentages) {
+      const pct = appState.slotPercentages[key];
+      const allocated = Math.round(appState.monthlyIncome * pct);
+
+      const pctBadge = document.getElementById(`pctBadge_${key}`);
+      const amtBadge = document.getElementById(`amtBadge_${key}`);
+
+      if (pctBadge) pctBadge.innerText = `${Math.round(pct * 100)}%`;
+      if (amtBadge) amtBadge.innerText = `₹${allocated.toLocaleString("en-IN")}`;
+    }
+
+    renderMasterChart();
+  }
+
+  // ---------- MODAL OPEN / CLOSE HANDLERS ----------
+  function closeModals() {
+    document.querySelectorAll(".modal-overlay").forEach(m => m.classList.remove("active"));
+  }
+
+  function openIncomeModal() {
+    document.getElementById("inputModalIncome").value = appState.monthlyIncome;
+    document.getElementById("modalIncome").classList.add("active");
+  }
+
+  function saveMonthlyIncome() {
+    const val = Number(document.getElementById("inputModalIncome").value);
+    if (!isNaN(val) && val > 0) {
+      appState.monthlyIncome = val;
+      refreshDashboard();
+      closeModals();
+    } else {
+      alert("Please enter a valid positive income amount.");
+    }
+  }
+
+  function openSplitModal() {
+    document.getElementById("splitInput_investment").value = Math.round(appState.slotPercentages.investment * 100);
+    document.getElementById("splitInput_health").value = Math.round(appState.slotPercentages.health * 100);
+    document.getElementById("splitInput_travel").value = Math.round(appState.slotPercentages.travel * 100);
+    document.getElementById("splitInput_personal").value = Math.round(appState.slotPercentages.personal * 100);
+    document.getElementById("splitInput_house").value = Math.round(appState.slotPercentages.house * 100);
+    document.getElementById("modalSplits").classList.add("active");
+  }
+
+  function saveMasterPercentages() {
+    const inv = Number(document.getElementById("splitInput_investment").value);
+    const hlt = Number(document.getElementById("splitInput_health").value);
+    const trv = Number(document.getElementById("splitInput_travel").value);
+    const per = Number(document.getElementById("splitInput_personal").value);
+    const hse = Number(document.getElementById("splitInput_house").value);
+
+    const sum = inv + hlt + trv + per + hse;
+    if (sum !== 100) {
+      alert(`The percentages must sum up to exactly 100%. Current total: ${sum}%`);
+      return;
+    }
+
+    appState.slotPercentages.investment = inv / 100;
+    appState.slotPercentages.health = hlt / 100;
+    appState.slotPercentages.travel = trv / 100;
+    appState.slotPercentages.personal = per / 100;
+    appState.slotPercentages.house = hse / 100;
+
+    refreshDashboard();
+    closeModals();
+  }
+
+  // ---------- DEDICATED INDIVIDUAL SLOT PAGE ----------
+  function openDedicatedSlotPage(slotKey) {
+    appState.currentSlotKey = slotKey;
+    document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+    document.getElementById("slotPageScreen").classList.add("active");
+
+    const titles = {
+      investment: "Investment Slot",
+      health: "Health & Emergency Slot",
+      travel: "Traveling Slot",
+      personal: "Personal Expenses Slot",
+      house: "House Expenses Slot"
+    };
+
+    document.getElementById("slotPageHeaderTitle").innerText = titles[slotKey] || "Slot Page";
+    renderDedicatedSlotScreen();
+  }
+
+  function renderDedicatedSlotScreen() {
+    const slotKey = appState.currentSlotKey;
+    const totalAllocated = Math.round(appState.monthlyIncome * appState.slotPercentages[slotKey]);
+    const spentTotal = appState.transactions[slotKey].reduce((sum, item) => sum + item.amount, 0);
+    const remaining = totalAllocated - spentTotal;
+
+    document.getElementById("slotPageAllocatedDisplay").innerText = `₹${totalAllocated.toLocaleString("en-IN")}`;
+    document.getElementById("slotPageRemainingDisplay").innerText = `₹${remaining.toLocaleString("en-IN")}`;
+    document.getElementById("slotPageRemainingDisplay").style.color = remaining < 0 ? "var(--danger)" : "var(--success)";
+
+    // Render Sub-Slots with rename/edit/remove
+    const container = document.getElementById("subSlotsListContainer");
+    container.innerHTML = "";
+
+    const list = appState.subSlots[slotKey] || [];
+    list.forEach((sub, idx) => {
+      const subBudget = Math.round(totalAllocated * sub.share);
+      const row = document.createElement("div");
+      row.className = "subslot-item";
+      row.innerHTML = `
+        <div style="flex: 1;">
+          <strong style="font-size: 14.5px;">${sub.name}</strong>
+          <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">
+            Share: ${(sub.share * 100).toFixed(0)}% • Target: ₹${subBudget.toLocaleString("en-IN")}
+          </div>
+          <div class="progress-bar-bg">
+            <div class="progress-fill" style="width: ${Math.min(sub.share * 100, 100)}%;"></div>
+          </div>
+        </div>
+        <div style="display: flex; gap: 6px; margin-left: 10px;">
+          <button class="btn btn-sm btn-secondary" onclick="openEditSubSlotModal(${idx})" title="Rename or adjust %"><i class="fa-solid fa-pen"></i></button>
+          <button class="btn btn-sm btn-danger" onclick="removeSubSlot(${idx})" title="Remove sub-slot"><i class="fa-solid fa-trash"></i></button>
+        </div>
+      `;
+      container.appendChild(row);
+    });
+
+    // Render Transactions for this slot below in this respective page
+    const txContainer = document.getElementById("slotTransactionsList");
+    txContainer.innerHTML = "";
+
+    if (appState.transactions[slotKey].length === 0) {
+      txContainer.innerHTML = `<p style="font-size: 12.5px; color: var(--text-muted); padding: 8px 0;">No transactions logged in this slot yet.</p>`;
+    } else {
+      appState.transactions[slotKey].slice().reverse().forEach(tx => {
+        const item = document.createElement("div");
+        item.style = "display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #fceae2;";
+        item.innerHTML = `
+          <div>
+            <div style="font-weight: 600; font-size: 13.5px;">${tx.desc}</div>
+            <div style="font-size: 11px; color: var(--text-muted);">${tx.date}</div>
+          </div>
+          <div style="font-weight: 700; color: var(--danger); font-size: 14px;">-₹${tx.amount.toLocaleString("en-IN")}</div>
+        `;
+        txContainer.appendChild(item);
+      });
+    }
+  }
+
+  function openAddSubSlotModal() {
+    document.getElementById("modalSubSlotTitle").innerText = "Add New Sub-Slot";
+    document.getElementById("editSubSlotIndex").value = "-1";
+    document.getElementById("inputSubSlotName").value = "";
+    document.getElementById("inputSubSlotShare").value = "20";
+    document.getElementById("modalSubSlot").classList.add("active");
+  }
+
+  function openEditSubSlotModal(idx) {
+    const item = appState.subSlots[appState.currentSlotKey][idx];
+    document.getElementById("modalSubSlotTitle").innerText = "Edit / Rename Sub-Slot";
+    document.getElementById("editSubSlotIndex").value = idx;
+    document.getElementById("inputSubSlotName").value = item.name;
+    document.getElementById("inputSubSlotShare").value = Math.round(item.share * 100);
+    document.getElementById("modalSubSlot").classList.add("active");
+  }
+
+  function saveSubSlotEntry() {
+    const idx = Number(document.getElementById("editSubSlotIndex").value);
+    const name = document.getElementById("inputSubSlotName").value.trim();
+    const share = Number(document.getElementById("inputSubSlotShare").value);
+
+    if (!name || isNaN(share) || share <= 0) {
+      alert("Please enter a valid sub-slot name and positive percentage.");
+      return;
+    }
+
+    if (idx === -1) {
+      // Add new sub slot
+      appState.subSlots[appState.currentSlotKey].push({
+        name: name,
+        share: share / 100
+      });
+    } else {
+      // Edit existing sub slot
+      appState.subSlots[appState.currentSlotKey][idx].name = name;
+      appState.subSlots[appState.currentSlotKey][idx].share = share / 100;
+    }
+
+    closeModals();
+    renderDedicatedSlotScreen();
+  }
+
+  function removeSubSlot(idx) {
+    if (confirm("Remove this sub-slot?")) {
+      appState.subSlots[appState.currentSlotKey].splice(idx, 1);
+      renderDedicatedSlotScreen();
+    }
+  }
+
+  function submitSlotExpense() {
+    const desc = document.getElementById("txDescriptionInput").value.trim();
+    const amt = Number(document.getElementById("txAmountInput").value);
+
+    if (!desc || isNaN(amt) || amt <= 0) {
+      alert("Please provide a valid description and positive expense amount.");
+      return;
+    }
+
+    appState.transactions[appState.currentSlotKey].push({
+      desc: desc,
+      amount: amt,
+      date: new Date().toLocaleDateString("en-IN", { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
+    });
+
+    document.getElementById("txDescriptionInput").value = "";
+    document.getElementById("txAmountInput").value = "";
+    renderDedicatedSlotScreen();
+  }
+
+  // ---------- CHARTS & TRANSACTION GRAPHS ----------
+  function renderMasterChart() {
+    const ctx = document.getElementById("quickMasterChart");
+    if (!ctx) return;
+    if (masterChartInstance) masterChartInstance.destroy();
+
+    const data = [
+      appState.slotPercentages.investment * 100,
+      appState.slotPercentages.health * 100,
+      appState.slotPercentages.travel * 100,
+      appState.slotPercentages.personal * 100,
+      appState.slotPercentages.house * 100
+    ];
+
+    masterChartInstance = new Chart(ctx, {
+      type: "doughnut",
+      data: {
+        labels: ["Investment (25%)", "Health (10%)", "Travel (15%)", "Personal (15%)", "House (35%)"],
+        datasets: [{
+          data: data,
+          backgroundColor: ["#5f259f", "#b91c1c", "#0284c7", "#d97706", "#16a34a"],
+          borderWidth: 2
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { position: "bottom" } }
+      }
+    });
+  }
+
+  function renderAnalyticsGraphs() {
+    const keys = ["investment", "health", "travel", "personal", "house"];
+    const labels = ["Investment", "Health", "Travel", "Personal", "House"];
+
+    const allocatedData = keys.map(k => Math.round(appState.monthlyIncome * appState.slotPercentages[k]));
+    const spentData = keys.map(k => appState.transactions[k].reduce((acc, t) => acc + t.amount, 0));
+
+    // Bar Graph
+    const barCtx = document.getElementById("barAnalyticsChart");
+    if (barChartInstance) barChartInstance.destroy();
+    barChartInstance = new Chart(barCtx, {
+      type: "bar",
+      data: {
+        labels: labels,
+        datasets: [
+          { label: "Budget (₹)", data: allocatedData, backgroundColor: "#5f259f" },
+          { label: "Spent (₹)", data: spentData, backgroundColor: "#ff7043" }
+        ]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { position: "top" } }
+      }
+    });
+
+    // Doughnut Graph
+    const dCtx = document.getElementById("doughnutAnalyticsChart");
+    if (doughnutChartInstance) doughnutChartInstance.destroy();
+    const hasTransactions = spentData.some(v => v > 0);
+
+    doughnutChartInstance = new Chart(dCtx, {
+      type: "doughnut",
+      data: {
+        labels: labels,
+        datasets: [{
+          data: hasTransactions ? spentData : allocatedData,
+          backgroundColor: ["#5f259f", "#b91c1c", "#0284c7", "#d97706", "#16a34a"]
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { position: "bottom" },
+          title: { display: true, text: hasTransactions ? "Real Expense Spending (₹)" : "Master Budget Allocation" }
+        }
+      }
+    });
+  }
+
+  // ---------- AI FINANCIAL ADVISOR CHATBOT ----------
+  function appendChatBubble(text, sender = "bot") {
+    const container = document.getElementById("chatMessagesBox");
+    const bubble = document.createElement("div");
+    bubble.className = `msg ${sender === 'bot' ? 'msg-bot' : 'msg-user'}`;
+    bubble.innerText = text;
+    container.appendChild(bubble);
+    container.scrollTop = container.scrollHeight;
+  }
+
+  function handleSendChat() {
+    const input = document.getElementById("chatTextInput");
+    const val = input.value.trim();
+    if (!val) return;
+    appendChatBubble(val, "user");
+    input.value = "";
+
+    setTimeout(() => {
+      respondToChat(val.toLowerCase());
+    }, 400);
+  }
+
+  function sendQuickQuery(query) {
+    appendChatBubble(query, "user");
+    setTimeout(() => {
+      respondToChat(query.toLowerCase());
+    }, 400);
+  }
+
+  function botRecommendForCurrentIncome() {
+    const income = appState.monthlyIncome;
+    const invBudget = Math.round(income * appState.slotPercentages.investment);
+
+    let advice = "";
+    if (income < 35000) {
+      advice = `For your monthly income of ₹${income.toLocaleString("en-IN")}, your 25% investment bucket is ₹${invBudget.toLocaleString("en-IN")}/month:\n` +
+               `• 40% (₹${Math.round(invBudget*0.4)}) into Recurring Deposit / Liquid Fund (Capital Safety)\n` +
+               `• 40% (₹${Math.round(invBudget*0.4)}) into a Nifty 50 Index Mutual Fund SIP\n` +
+               `• 20% (₹${Math.round(invBudget*0.2)}) into Sovereign Gold Bonds or Digital Gold.`;
+    } else if (income <= 90000) {
+      advice = `For your monthly income of ₹${income.toLocaleString("en-IN")}, your 25% investment allocation is ₹${invBudget.toLocaleString("en-IN")}/month:\n` +
+               `• 50% (₹${Math.round(invBudget*0.5)}) into Flexi-Cap & Nifty 50 Index Mutual Funds\n` +
+               `• 25% (₹${Math.round(invBudget*0.25)}) into PPF for risk-free tax exempt 7.1% compounding\n` +
+               `• 25% (₹${Math.round(invBudget*0.25)}) into Direct Bluechip Equities.`;
+    } else {
+      advice = `High Earner Portfolio (₹${income.toLocaleString("en-IN")}/month). 25% Investment Slot = ₹${invBudget.toLocaleString("en-IN")}/month:\n` +
+               `• 40% (₹${Math.round(invBudget*0.4)}) in Active Mid & Small Cap Equity Funds\n` +
+               `• 30% (₹${Math.round(invBudget*0.3)}) in Direct Large Cap Stocks + Global Tech ETFs\n` +
+               `• 20% (₹${Math.round(invBudget*0.2)}) in REITs & Gold for hedge\n` +
+               `• 10% (₹${Math.round(invBudget*0.1)}) in NPS Tier-1 for Section 80CCD tax saving.`;
+    }
+
+    appendChatBubble(advice, "bot");
+  }
+
+  function respondToChat(q) {
+    if (q.includes("investment") || q.includes("25%")) {
+      appendChatBubble("In your 25% Investment bucket, keep the default 25% savings share as a liquid cash buffer, 50% in Systematic Index Funds, and 25% in high-conviction direct equities.", "bot");
+    } else if (q.includes("emergency") || q.includes("health")) {
+      const houseExp = appState.monthlyIncome * appState.slotPercentages.house;
+      appendChatBubble(`Your ideal Emergency buffer should cover 6 months of essential living costs (₹${(houseExp * 6).toLocaleString("en-IN")}). Park this in an Instant-Access Liquid Fund or Sweep-in FD.`, "bot");
+    } else if (q.includes("income") || q.includes("plan") || q.includes("recommend")) {
+      botRecommendForCurrentIncome();
+    } else {
+      appendChatBubble(`At your current monthly income of ₹${appState.monthlyIncome.toLocaleString("en-IN")}, consistently routing your ₹${Math.round(appState.monthlyIncome * appState.slotPercentages.investment).toLocaleString("en-IN")} investment slot at 12% CAGR creates over ₹23 Lakhs in 7 years!`, "bot");
+    }
+  }
+</script>
+
+</body>
+</html>
